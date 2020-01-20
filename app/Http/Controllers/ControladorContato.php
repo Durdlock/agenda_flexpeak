@@ -15,7 +15,7 @@ class ControladorContato extends Controller
      */
     public function index()
     {
-        return view('contatos', ['conts' => Contato::all()]);
+        return view('contatos.index', ['conts' => Contato::all()]);
     }
 
     /**
@@ -25,7 +25,7 @@ class ControladorContato extends Controller
      */
     public function create()
     {
-        return view('novocontato');
+        return view('contatos.create');
     }
 
     /**
@@ -35,7 +35,20 @@ class ControladorContato extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    {   
+        $mensagens=[
+            'unique' => 'O campo :attribute tem que ser único',
+            'required' => 'O campo :attribute tem que ser preenchido',
+            'email.email' => 'Preencher :attribute com formato válido',
+            'telefone.numeric' => 'Preencher :attribute com formato válido'
+
+        ];
+        $request->validate([
+            'nome' => 'required',
+            'telefone' => 'required|numeric|unique:contatos',
+            'email' => 'required|email'
+        ],$mensagens);
+        
         $data = $request->all();
         if ($request->imagem) {
             $urlImagem = $request->file('imagem')->store('imagens');
@@ -43,7 +56,7 @@ class ControladorContato extends Controller
         }
             
         Contato::create($data);
-        return view('contatos', ['conts' => Contato::all()]);
+        return view('contatos.index', ['conts' => Contato::all()]);
         
     }
 
@@ -68,9 +81,9 @@ class ControladorContato extends Controller
     {
         $cont = Contato::find($id);
         if(isset($cont))
-            return view('editarcontato',compact('cont'));
+            return view('contatos.edit',compact('cont'));
         else
-            return redirect ('/contatos');
+            return redirect ('/contatos.index');
     }
 
     /**
@@ -82,6 +95,18 @@ class ControladorContato extends Controller
      */
     public function update(Request $request, $id)
     {
+        $mensagens=[
+            'unique' => 'O campo :attribute tem que ser único',
+            'required' => 'O campo :attribute tem que ser preenchido',
+            'email.email' => 'Preencher :attribute com formato válido',
+            'telefone.numeric' => 'Preencher :attribute com formato válido'
+
+        ];
+        $request->validate([
+            'nome' => 'required',
+            'telefone' => 'required|numeric|',
+            'email' => 'required|email'
+        ],$mensagens);
         $data = $request->all();
         if ($request->imagem) {
             $urlImagem = $request->file('imagem')->store('imagens');
@@ -99,7 +124,7 @@ class ControladorContato extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {
+    {   
         $conts = Contato::find($id);
         if(isset($conts)){
             $conts->delete();
